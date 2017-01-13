@@ -63,8 +63,8 @@ if __name__ == '__main__':
     logging.info("Started")
 
     save_pid()
-    folderpath = path.basename(path.dirname(path.realpath(__file__)))
-    processes = [path.join(folderpath, 'TF-img-API', 'TFWorker-API.py'), path.join(folderpath, 'APIConsumer', 'APIConsumer.py')]
+
+    processes = [path.join('TF-img-API', 'TFWorker-API.py'), path.join('APIConsumer', 'APIConsumer.py')]
     end = False
 
     while not end:
