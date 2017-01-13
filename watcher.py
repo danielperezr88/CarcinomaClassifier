@@ -56,7 +56,11 @@ def keep_processes_alive(processes):
         launch_py_if_stop(process)
 
 
-def main():
+if __name__ == '__main__':
+
+    logfilename = inspect.getfile(inspect.currentframe()) + ".log"
+    logging.basicConfig(filename=logfilename, level=logging.INFO, format='%(asctime)s %(message)s')
+    logging.info("Started")
 
     save_pid()
     processes = [path.join('TF-img-API', 'TFWorker-API.py'), path.join('APIConsumer', 'APIConsumer.py')]
@@ -64,3 +68,4 @@ def main():
 
     while not end:
         keep_processes_alive(processes)
+
