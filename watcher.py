@@ -22,10 +22,7 @@ def check_pid(pid):
 
 
 def launch_py(process):
-    dirname = path.dirname(inspect.getfile(inspect.currentframe()))
-    filename = path.join(dirname, process)
-    # start python process
-    return str(subprocess.Popen([python_path, filename]).pid)
+    return str(subprocess.Popen([python_path, process]).pid)
 
 
 def launch_py_if_stop(process):
@@ -63,8 +60,8 @@ if __name__ == '__main__':
     logging.info("Started")
 
     save_pid()
-
-    processes = [path.join('TF-img-API', 'TFWorker-API.py'), path.join('APIConsumer', 'APIConsumer.py')]
+    folderpath = path.basename(path.dirname(path.realpath(__file__)))
+    processes = [path.join(folderpath, 'TF-img-API', 'TFWorker-API.py'), path.join(folderpath, 'APIConsumer', 'APIConsumer.py')]
     end = False
 
     while not end:
