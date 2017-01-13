@@ -4,6 +4,8 @@ import subprocess
 import logging
 from sys import executable as python_path
 
+from time import sleep
+
 
 def save_pid():
     """Save pid into a file: filename.pid."""
@@ -66,4 +68,4 @@ if __name__ == '__main__':
 
     while not end:
         keep_processes_alive(processes)
-
+        sleep(3)
