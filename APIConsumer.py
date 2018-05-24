@@ -80,10 +80,8 @@ IP = req.get(generate_url('jsonip.com')).json()['ip']
 DEFAULT_PORT = 80
 PORT = int(environ.get('PORT', DEFAULT_PORT))
 
-API_HOST = parse(request.base_url).hostname.split('.')[0] + '-api.herokuapp.com'
 API_PROTOCOL = 'https'
 API_PORT = 88 if PORT == DEFAULT_PORT else 80
-API_ENDPOINT = generate_url(API_HOST, protocol=API_PROTOCOL, dir=['api', 'infer'], port=API_PORT)
 #API_HOST = IP
 #API_HOST = '130.211.59.105'
 
@@ -116,7 +114,9 @@ def api_infer():
     #no_impostors_wanted(session)
     image = request.form['image']
     model = request.form['model']
-    result = req.post(API_ENDPOINT, data=json.dumps(dict(image=image, model=model)))
+    api_host = parse(request.base_url).hostname.split('.')[0] + '-api.herokuapp.com'
+    api_endpoint = generate_url(api_host, protocol=API_PROTOCOL, dir=['api', 'infer'], port=API_PORT)
+    result = req.post(api_endpoint, data=json.dumps(dict(image=image, model=model)))
     return json.dumps(result.json())
 
 
@@ -141,7 +141,7 @@ def api_infer():
 @app.route('/test_api', methods=['GET'])
 def test_api():
     #no_impostors_wanted(session)
-    return render_template('test_api.html', API_ENDPOINT=API_ENDPOINT)
+    return render_template('test_api.html')
 
 @app.after_request
 def apply_caching(response):
