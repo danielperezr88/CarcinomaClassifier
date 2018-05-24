@@ -1,6 +1,0 @@
-[submodule "APIConsumer"]
-	path = APIConsumer
-	url = https://danielperezr88@github.com/danielperezr88/APIConsumer.git
-[submodule "TF-img-API"]
-	path = TF-img-API
-	url = https://danielperezr88@github.com/danielperezr88/TF-img-API.git

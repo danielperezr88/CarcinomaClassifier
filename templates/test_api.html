@@ -1,0 +1,147 @@
+{% extends "index.html" %}
+{% block body %}
+  <div id="content">
+    <div id="form-outer-wrapper">
+      <div id="form-inner-wrapper">
+        <!--<h2>Test API</h2>-->
+        {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
+        <form id="api_test_form" action="{{ url_for('test_api') }}" method=get>
+            <dl>
+              <dt>URL:
+              <dd><input type=text name=url>
+              <dt>Model:
+              <dd>
+                <select>
+                  <option value='flowers'>Flowers</option>
+                  <option value='breakhis' selected>Breast Cancer</option>
+                </select>
+              <dd><input type=submit value=Proceed>
+            </dl>
+        </form>
+        <div id="result"></div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+{% block footer_extra %}
+    <script type="text/javascript" charset="utf-8">
+
+      var colors = [
+        "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd",
+        "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"
+      ];
+
+      $(document).ready(function() {
+        ldw = $('<div/>').addClass('loader-wrapper').hide();
+        $('#flash-msg').append(ldw);
+        $('form#api_test_form').submit(function(event){
+          event.preventDefault();
+          event.stopPropagation();
+          jsFlash('processing_ajax','Processing...');
+          $('.loader-wrapper').html('');
+          $('.loader-wrapper').data('loadie-loaded',0);
+          $('.loader-wrapper').show();
+          $('.loader-wrapper').loadie(0);
+          
+          var xhttp;
+          if(window.XMLHttpRequest){
+            xhttp = new XMLHttpRequest();
+          } else {
+            xhttp = new ActiveXObject("Microsoft.XMLHTTP");
+          }
+          
+          xhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+
+              $('.loader-wrapper').loadie(1);
+              setTimeout(function(){ $('.loader-wrapper').hide(500);}, 2500);
+
+              var obj = JSON.parse(this.responseText)["data"];
+
+              $('#result').append($('<p/>').append('PREDICTIONS')).append($('<canvas/>'));
+
+              var canvas = document.querySelector("canvas");
+              var context = canvas.getContext("2d"),
+                width = canvas.width,
+                height = canvas.height;
+              var radius = Math.min(width, height) / 2;
+
+              $(canvas).css('width','100%');
+
+              var arc = d3.arc()
+                .outerRadius(radius - 10)
+                .innerRadius(radius - 30)
+                .padAngle(0.03)
+                .context(context);
+
+              var pie = d3.pie();
+              pie.value(function(d){return (d==0)? d : d3.scaleLog().domain([1,1.1]).range([0.1,0.2])(parseFloat(d)*100+1);});
+              
+              var vals = Object.keys(obj).map(function(key) {
+                return obj[key];
+              });
+
+              var arcs = pie(vals);
+              context.translate(width / 2, height / 2);
+
+              context.globalAlpha = 0.5;
+              
+              arcs.forEach(function(d, i) {
+                context.beginPath();
+                arc(d);
+                context.fillStyle = colors[i];
+                context.fill();
+              });
+
+              context.globalAlpha = 1;
+              context.beginPath();
+              arcs.forEach(arc);
+              context.lineWidth = 1.5;
+              context.stroke();
+              res = $('<div/>').append($('<ul/>'));
+              var index = 0;
+              for (var key in obj){
+                res.find('ul').append(
+                  $('<li/>').append(
+                    $('<div/>')
+                      .append($('<div/>')
+                        .css({
+                          'background-color':colors[index++],
+                          border:'solid 1px'
+                        })
+                      )
+                      .append($('<h4/>').append(key/*+': '*/)).html()/*+$('<div/>').append(
+                        $('<p/>').append(
+                          '~'+(parseFloat(obj[key])*100).toFixed(2)+'%'
+                        )
+                      ).html()*/
+                  )
+                );
+              }
+              $('#result').append(res.html());
+              jsFlash('success_ajax','Success');
+
+            } else if (this.readyState == 4 && this.status != 200){
+              jsFlash('error_ajax',`Request failed ({this.status})... If this persists, please contact system administrator.`);
+            } else {
+              console.log('complete');
+            }
+          };
+
+          $('#result').html('');
+          var img = new Image();
+          $('.loader-wrapper').loadie(0.1);
+          img.src = $('form#api_test_form').find('input').eq(0).val();
+          $(img).appendTo('#result');
+          $('#result').show();
+          $('.loader-wrapper').loadie(0.4);
+
+          xhttp.open("POST","{{ API_ENDPOINT }}",true);
+          xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+          xhttp.send('image='+encodeURIComponent($('form#api_test_form').find('input').eq(0).val())+"&model="+encodeURIComponent($('form#api_test_form').find('select').eq(0).val()))
+
+          return false;
+        });
+      });
+    </script>
+{% endblock %}
