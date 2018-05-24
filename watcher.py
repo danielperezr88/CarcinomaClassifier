@@ -1,4 +1,5 @@
 from os import path, remove, getpid, popen
+from psutil import pid_exists as check_pid
 import inspect
 import subprocess
 import logging
@@ -19,8 +20,8 @@ def save_pid():
         logging.error('Failed to create pid file: ' + str(e))
 
 
-def check_pid(pid):
-    return int(popen("ps -p %d --no-headers | wc -l" % (int(pid) if len(pid) > 0 else 0,)).read().strip()) == 1
+#def check_pid(pid):
+#    return int(popen("ps -p %d --no-headers | wc -l" % (pid if len(str(pid)) > 0 else 0,)).read().strip()) == 1
 
 
 def launch_py(process):
@@ -34,7 +35,7 @@ def launch_py_if_stop(process):
         # check if pid is running
         with open(pidfile, 'r') as f:
             pid_data = f.read()
-        if not check_pid(pid_data):
+        if not check_pid(int(pid_data)):
             pid = launch_py(process)
             remove(pidfile)
             with open(pidfile, 'w') as f:
